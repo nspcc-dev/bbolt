@@ -347,6 +347,16 @@ func (tx *Tx) close() {
 		return
 	}
 	if tx.writable {
+		// metalock protects freelist access here, avoiding a lock in
+		// freelist itself.
+		tx.db.metalock.Lock()
+
+		// It doesn't matter if tx was committed or not, in the worst
+		// case this ID will just be a placeholder for the future.
+		tx.db.freelist.AddCurrentTXID(tx.meta.Txid())
+
+		tx.db.metalock.Unlock()
+
 		// Grab freelist stats.
 		var freelistFreeN = tx.db.freelist.FreeCount()
 		var freelistPendingN = tx.db.freelist.PendingCount()
