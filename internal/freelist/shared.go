@@ -162,15 +162,11 @@ func (t txIDx) Len() int           { return len(t) }
 func (t txIDx) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
 func (t txIDx) Less(i, j int) bool { return t[i] < t[j] }
 
-func (t *shared) ReleasePendingPages(tid common.Txid) {
+func (t *shared) ReleasePendingPages() {
 	// Free all pending pages prior to the earliest open transaction.
 	minid := common.Txid(math.MaxUint64)
-	inUseID := tid - 1 // new readers can still use it
 
-	t.readerRefsMtx.Lock()
-	t.readerRefs = slices.DeleteFunc(t.readerRefs, func(e *txIdReference) bool {
-		return e.txid < inUseID && e.refs.Load() == 0
-	})
+	t.readerRefsMtx.RLock()
 	for i := range t.readerRefs {
 		if t.readerRefs[i].refs.Load() != 0 && minid > t.readerRefs[i].txid {
 			minid = t.readerRefs[i].txid
@@ -184,13 +180,18 @@ func (t *shared) ReleasePendingPages(tid common.Txid) {
 		t.releaseRange(minid, e.txid-1)
 		minid = e.txid + 1
 	}
-	t.readerRefsMtx.Unlock()
+	t.readerRefsMtx.RUnlock()
 	t.releaseRange(minid, common.Txid(math.MaxUint64))
 	// Any page both allocated and freed in an extent is safe to release.
 }
 
 func (t *shared) AddCurrentTXID(tid common.Txid) {
+	inUseID := tid - 1 // new readers can still use it
+
 	t.readerRefsMtx.Lock()
+	t.readerRefs = slices.DeleteFunc(t.readerRefs, func(e *txIdReference) bool {
+		return e.txid < inUseID && e.refs.Load() == 0
+	})
 	t.readerRefs = append(t.readerRefs, &txIdReference{txid: tid})
 	t.readerRefsMtx.Unlock()
 }

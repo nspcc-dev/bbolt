@@ -795,12 +795,12 @@ func (db *DB) beginTx() (*Tx, error) {
 	t := &Tx{}
 	t.init(db)
 
-	// Unlock the meta pages.
-	db.metalock.RUnlock()
-
 	if db.freelist != nil {
 		db.freelist.AddReadonlyTXID(t.meta.Txid())
 	}
+
+	// Unlock the meta pages.
+	db.metalock.RUnlock()
 
 	// Update the transaction stats.
 	if db.stats != nil {
@@ -825,8 +825,8 @@ func (db *DB) beginRWTx() (*Tx, error) {
 
 	// Once we have the writer lock then we can lock the meta pages so that
 	// we can set up the transaction.
-	db.metalock.RLock()
-	defer db.metalock.RUnlock()
+	db.metalock.Lock()
+	defer db.metalock.Unlock()
 
 	// Exit if the database is not open yet.
 	if !db.opened {
@@ -844,7 +844,7 @@ func (db *DB) beginRWTx() (*Tx, error) {
 	t := &Tx{writable: true}
 	t.init(db)
 	db.rwtx = t
-	db.freelist.ReleasePendingPages(t.meta.Txid())
+	db.freelist.ReleasePendingPages()
 	return t, nil
 }
 
