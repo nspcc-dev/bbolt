@@ -687,7 +687,7 @@ func (db *DB) close() error {
 
 	db.opened = false
 
-	db.freelist = nil
+	// db.freelist = nil
 
 	// Clear ops.
 	db.ops.writeAt = nil
@@ -849,12 +849,12 @@ func (db *DB) beginRWTx() (*Tx, error) {
 
 // removeTx removes a transaction from the database.
 func (db *DB) removeTx(tx *Tx) {
+	// Release the read lock on the mmap.
+	db.mmaplock.RUnlock()
+
 	if db.freelist != nil {
 		db.freelist.RemoveReadonlyTXID(tx.meta.Txid())
 	}
-
-	// Release the read lock on the mmap (this also protects freelist wrt close()).
-	db.mmaplock.RUnlock()
 
 	// Merge statistics.
 	if db.stats != nil {
