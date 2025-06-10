@@ -687,7 +687,7 @@ func (db *DB) close() error {
 
 	db.opened = false
 
-	db.freelist = nil
+	// db.freelist = nil
 
 	// Clear ops.
 	db.ops.writeAt = nil
