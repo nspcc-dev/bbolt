@@ -422,6 +422,7 @@ func (db *DB) loadFreelist() {
 			// Read free list from freelist page.
 			db.freelist.Read(db.page(db.meta().Freelist()))
 		}
+		db.freelist.AddCurrentTXID(db.meta().Txid())
 		if db.stats != nil {
 			db.stats.FreePageN = db.freelist.FreeCount()
 		}
