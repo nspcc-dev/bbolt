@@ -415,6 +415,7 @@ func (db *DB) getPageSizeFromSecondMeta() (int, bool, error) {
 func (db *DB) loadFreelist() {
 	db.freelistLoad.Do(func() {
 		db.freelist = newFreelist(db.FreelistType)
+		db.freelist.AddCurrentTXID(db.meta().Txid())
 		if !db.hasSyncedFreelist() {
 			// Reconstruct free list by scanning the DB.
 			db.freelist.Init(db.freepages())
@@ -422,7 +423,6 @@ func (db *DB) loadFreelist() {
 			// Read free list from freelist page.
 			db.freelist.Read(db.page(db.meta().Freelist()))
 		}
-		db.freelist.AddCurrentTXID(db.meta().Txid())
 		if db.stats != nil {
 			db.stats.FreePageN = db.freelist.FreeCount()
 		}
