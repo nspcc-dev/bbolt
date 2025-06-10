@@ -213,10 +213,11 @@ func (tx *Tx) Commit() (err error) {
 
 	// Free the old freelist because commit writes out a fresh freelist.
 	if tx.meta.Freelist() != common.PgidNoFreelist {
-		tx.db.metalock.Lock()
 		tx.db.freelist.Free(tx.meta.Txid(), tx.db.page(tx.meta.Freelist()))
-		tx.db.metalock.Unlock()
 	}
+	tx.db.metalock.Lock()
+	tx.db.freelist.AddCurrentTXID(tx.meta.Txid())
+	tx.db.metalock.Unlock()
 
 	if !tx.db.NoFreelistSync {
 		err = tx.commitFreelist()
