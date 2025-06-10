@@ -688,7 +688,7 @@ func (db *DB) close() error {
 
 	db.opened = false
 
-	// db.freelist = nil
+	db.freelist = nil
 
 	// Clear ops.
 	db.ops.writeAt = nil
@@ -853,9 +853,15 @@ func (db *DB) removeTx(tx *Tx) {
 	// Release the read lock on the mmap.
 	db.mmaplock.RUnlock()
 
+	// Use the meta lock to restrict access to the DB object.
+	db.metalock.RLock()
+
 	if db.freelist != nil {
 		db.freelist.RemoveReadonlyTXID(tx.meta.Txid())
 	}
+
+	// Unlock the meta pages.
+	db.metalock.RUnlock()
 
 	// Merge statistics.
 	if db.stats != nil {
