@@ -83,8 +83,6 @@ func (t *shared) Free(txid common.Txid, p *common.Page) {
 		delete(t.allocs, p.Id())
 	}
 
-	t.AddCurrentTXID(txid)
-
 	for id := p.Id(); id <= p.Id()+common.Pgid(p.Overflow()); id++ {
 		// Verify that page is not already free.
 		if _, ok := t.cache[id]; ok {
@@ -136,9 +134,10 @@ func (t *shared) Rollback(txid common.Txid) {
 
 func (t *shared) AddReadonlyTXID(tid common.Txid) {
 	t.readerRefsMtx.RLock()
-	for _, r := range t.readerRefs {
-		if r.txid == tid {
-			r.refs.Add(1)
+	l := len(t.readerRefs)
+	for i := l - 1; i >= 0; i-- { // New transaction is likely to use the latest known ID.
+		if t.readerRefs[i].txid == tid {
+			t.readerRefs[i].refs.Add(1)
 			break
 		}
 	}

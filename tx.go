@@ -215,9 +215,6 @@ func (tx *Tx) Commit() (err error) {
 	if tx.meta.Freelist() != common.PgidNoFreelist {
 		tx.db.freelist.Free(tx.meta.Txid(), tx.db.page(tx.meta.Freelist()))
 	}
-	tx.db.metalock.Lock()
-	tx.db.freelist.AddCurrentTXID(tx.meta.Txid())
-	tx.db.metalock.Unlock()
 
 	if !tx.db.NoFreelistSync {
 		err = tx.commitFreelist()
@@ -228,6 +225,8 @@ func (tx *Tx) Commit() (err error) {
 	} else {
 		tx.meta.SetFreelist(common.PgidNoFreelist)
 	}
+
+	tx.db.freelist.AddCurrentTXID(tx.meta.Txid())
 
 	// If the high water mark has moved up then attempt to grow the database.
 	if tx.meta.Pgid() > opgid {
