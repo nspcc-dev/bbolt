@@ -358,9 +358,12 @@ func (tx *Tx) close() {
 		tx.db.metalock.Unlock()
 
 		// Grab freelist stats.
-		var freelistFreeN = tx.db.freelist.FreeCount()
-		var freelistPendingN = tx.db.freelist.PendingCount()
-		var freelistAlloc = tx.db.freelist.EstimatedWritePageSize()
+		var freelistFreeN, freelistPendingN, freelistAlloc int
+		if tx.db.stats != nil {
+			freelistFreeN = tx.db.freelist.FreeCount()
+			freelistPendingN = tx.db.freelist.PendingCount()
+			freelistAlloc = tx.db.freelist.EstimatedWritePageSize()
+		}
 
 		// Remove transaction ref & writer lock.
 		tx.db.rwtx = nil
