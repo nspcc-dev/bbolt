@@ -795,12 +795,12 @@ func (db *DB) beginTx() (*Tx, error) {
 	t := &Tx{}
 	t.init(db)
 
-	// Unlock the meta pages.
-	db.metalock.RUnlock()
-
 	if db.freelist != nil {
 		db.freelist.AddReadonlyTXID(t.meta.Txid())
 	}
+
+	// Unlock the meta pages.
+	db.metalock.RUnlock()
 
 	// Update the transaction stats.
 	if db.stats != nil {
@@ -850,15 +850,18 @@ func (db *DB) beginRWTx() (*Tx, error) {
 
 // removeTx removes a transaction from the database.
 func (db *DB) removeTx(tx *Tx) {
+	// Release the read lock on the mmap.
+	db.mmaplock.RUnlock()
+
+	// Use the meta lock to restrict access to the DB object.
+	db.metalock.RLock()
+
 	if db.freelist != nil {
 		db.freelist.RemoveReadonlyTXID(tx.meta.Txid())
 	}
 
-	// Release the read lock on the mmap. It's deliberately done after
-	// the freelist management above since db.freelist can be changed
-	// in close() and we have no other locks here to protect access
-	// to it.
-	db.mmaplock.RUnlock()
+	// Unlock the meta pages.
+	db.metalock.RUnlock()
 
 	// Merge statistics.
 	if db.stats != nil {
