@@ -176,7 +176,9 @@ func (t *shared) ReleasePendingPages(tid common.Txid) {
 		t.releaseRange(minid, e.txid-1)
 		minid = e.txid + 1
 	}
-	t.readerRefs = append(t.readerRefs, &txIdReference{txid: tid})
+	if !slices.ContainsFunc(t.readerRefs, func(e *txIdReference) bool { return e.txid == tid }) {
+		t.readerRefs = append(t.readerRefs, &txIdReference{txid: tid})
+	}
 	t.readerRefsMtx.Unlock()
 	t.releaseRange(minid, common.Txid(math.MaxUint64))
 	// Any page both allocated and freed in an extent is safe to release.
