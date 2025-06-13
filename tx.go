@@ -347,16 +347,6 @@ func (tx *Tx) close() {
 		return
 	}
 	if tx.writable {
-		// metalock protects freelist access here, avoiding a lock in
-		// freelist itself.
-		tx.db.metalock.Lock()
-
-		// It doesn't matter if tx was committed or not, in the worst
-		// case this ID will just be a placeholder for the future.
-		tx.db.freelist.AddCurrentTXID(tx.meta.Txid())
-
-		tx.db.metalock.Unlock()
-
 		// Grab freelist stats.
 		var freelistFreeN, freelistPendingN, freelistAlloc int
 		if tx.db.stats != nil {
@@ -575,6 +565,7 @@ func (tx *Tx) writeMeta() error {
 	p := tx.db.pageInBuffer(buf, 0)
 	tx.db.metalock.Lock()
 	tx.meta.Write(p)
+	tx.db.freelist.AddCurrentTXID(tx.meta.Txid())
 	tx.db.metalock.Unlock()
 
 	// Write the meta page to file.

@@ -125,9 +125,9 @@ func (t *shared) Rollback(txid common.Txid) {
 }
 
 func (t *shared) AddReadonlyTXID(tid common.Txid) {
-	for i := len(t.readerRefs) - 1; i >= 0; i-- { // New transaction is likely to use the latest known ID.
-		if t.readerRefs[i].txid == tid {
-			t.readerRefs[i].refs.Add(1)
+	for _, r := range t.readerRefs {
+		if r.txid == tid {
+			r.refs.Add(1)
 			break
 		}
 	}
