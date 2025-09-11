@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	testutils "go.etcd.io/bbolt/tests/utils"
+	testutils "github.com/nspcc-dev/bbolt/tests/utils"
 )
 
 func TestMain(m *testing.M) {

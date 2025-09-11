@@ -1,4 +1,4 @@
-module go.etcd.io/bbolt
+module github.com/nspcc-dev/bbolt
 
 go 1.23
 

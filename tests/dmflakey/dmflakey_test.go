@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	testutils "go.etcd.io/bbolt/tests/utils"
+	testutils "github.com/nspcc-dev/bbolt/tests/utils"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

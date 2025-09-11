@@ -10,9 +10,9 @@ import (
 	"time"
 	"unsafe"
 
-	berrors "go.etcd.io/bbolt/errors"
-	"go.etcd.io/bbolt/internal/common"
-	fl "go.etcd.io/bbolt/internal/freelist"
+	berrors "github.com/nspcc-dev/bbolt/errors"
+	"github.com/nspcc-dev/bbolt/internal/common"
+	fl "github.com/nspcc-dev/bbolt/internal/freelist"
 )
 
 // The time elapsed between consecutive file locking attempts.

@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"unsafe"
 
-	"go.etcd.io/bbolt/internal/common"
+	"github.com/nspcc-dev/bbolt/internal/common"
 )
 
 type txPending struct {

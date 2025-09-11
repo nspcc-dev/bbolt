@@ -14,14 +14,14 @@ import (
 	"sync"
 	"testing"
 
-	"go.etcd.io/bbolt/internal/btesting"
-	"go.etcd.io/bbolt/internal/guts_cli"
+	"github.com/nspcc-dev/bbolt/internal/btesting"
+	"github.com/nspcc-dev/bbolt/internal/guts_cli"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	bolt "go.etcd.io/bbolt"
-	main "go.etcd.io/bbolt/cmd/bbolt"
+	bolt "github.com/nspcc-dev/bbolt"
+	main "github.com/nspcc-dev/bbolt/cmd/bbolt"
 )
 
 // Ensure the "info" command can print information about a database.
