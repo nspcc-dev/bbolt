@@ -83,10 +83,13 @@ func (p *Page) Meta() *Meta {
 }
 
 func (p *Page) FastCheck(id Pgid) {
-	Assert(p.id == id, "Page expected to be: %v, but self identifies as %v", id, p.id)
+	if p.id != id {
+		panic(fmt.Sprintf("assertion failed: Page expected to be: %v, but self identifies as %v", id, p.id))
+	}
 	// Only one proper flag of page-type can be set.
-	Assert((p.flags&^allFlags == 0) && (bits.OnesCount16(p.flags) == 1),
-		"page %v: has unexpected type/flags: %x", p.id, p.flags)
+	if (p.flags&^allFlags != 0) || (bits.OnesCount16(p.flags) != 1) {
+		panic(fmt.Sprintf("assertion failed: page %v: has unexpected type/flags: %x", p.id, p.flags))
+	}
 }
 
 // LeafPageElement retrieves the leaf node by index
