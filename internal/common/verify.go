@@ -2,7 +2,6 @@
 package common
 
 import (
-	"fmt"
 	"os"
 	"strings"
 )
@@ -59,9 +58,9 @@ func Verify(f func()) {
 	}
 }
 
-// Assert will panic with a given formatted message if the given condition is false.
-func Assert(condition bool, msg string, v ...any) {
+// Assert will panic with a given message if the given condition is false.
+func Assert(condition bool, msg string) {
 	if !condition {
-		panic(fmt.Sprintf("assertion failed: "+msg, v...))
+		panic("assertion failed: " + msg)
 	}
 }

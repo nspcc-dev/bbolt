@@ -125,7 +125,9 @@ func (p *Page) BranchPageElements() []branchPageElement {
 }
 
 func (p *Page) FreelistPageCount() (int, int) {
-	Assert(p.IsFreelistPage(), fmt.Sprintf("can't get freelist page count from a non-freelist page: %2x", p.flags))
+	if !p.IsFreelistPage() {
+		panic(fmt.Sprintf("assertion failed: can't get freelist page count from a non-freelist page: %2x", p.flags))
+	}
 
 	// If the page.count is at the max uint16 value (64k) then it's considered
 	// an overflow and the size of the freelist is stored as the first element.
@@ -143,7 +145,9 @@ func (p *Page) FreelistPageCount() (int, int) {
 }
 
 func (p *Page) FreelistPageIds() []Pgid {
-	Assert(p.IsFreelistPage(), fmt.Sprintf("can't get freelist page IDs from a non-freelist page: %2x", p.flags))
+	if !p.IsFreelistPage() {
+		panic(fmt.Sprintf("assertion failed: can't get freelist page IDs from a non-freelist page: %2x", p.flags))
+	}
 
 	idx, count := p.FreelistPageCount()
 
