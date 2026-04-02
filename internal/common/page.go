@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"math/bits"
 	"os"
 	"sort"
 	"unsafe"
@@ -20,6 +21,8 @@ const (
 	LeafPageFlag     = 0x02
 	MetaPageFlag     = 0x04
 	FreelistPageFlag = 0x10
+
+	allFlags = BranchPageFlag | LeafPageFlag | MetaPageFlag | FreelistPageFlag
 )
 
 const (
@@ -81,11 +84,8 @@ func (p *Page) Meta() *Meta {
 
 func (p *Page) FastCheck(id Pgid) {
 	Assert(p.id == id, "Page expected to be: %v, but self identifies as %v", id, p.id)
-	// Only one flag of page-type can be set.
-	Assert(p.IsBranchPage() ||
-		p.IsLeafPage() ||
-		p.IsMetaPage() ||
-		p.IsFreelistPage(),
+	// Only one proper flag of page-type can be set.
+	Assert((p.flags&^allFlags == 0) && (bits.OnesCount16(p.flags) == 1),
 		"page %v: has unexpected type/flags: %x", p.id, p.flags)
 }
 
